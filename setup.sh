@@ -13,6 +13,27 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+if [ "$FLUSH" -eq 1 ]; then
+  echo "[*] --flush указан: очищаю iptables rules..."
+  iptables -F
+  iptables -t nat -F
+  iptables -t mangle -F
+
+  echo "[*] Setting default policies..."
+  iptables -P INPUT ACCEPT
+  iptables -P FORWARD ACCEPT
+  iptables -P OUTPUT ACCEPT
+
+  export DEBIAN_FRONTEND=noninteractive
+  if command -v netfilter-persistent >/dev/null 2>&1; then
+    echo "[*] Сохраняю пустые правила..."
+    netfilter-persistent save
+  fi
+
+  echo "[+] iptables очищен."
+  exit 0
+fi
+
 DEFAULT_BACKEND_PORT=8880
 
 read -rp "Entry port (на этой машине): " ENTRY_PORT
@@ -39,20 +60,6 @@ fi
 echo "Entry port: $ENTRY_PORT"
 echo "Backend: $BACKEND_IP:$BACKEND_PORT"
 echo "Interface: $IFACE"
-
-if [ "$FLUSH" -eq 1 ]; then
-  echo "[*] --flush указан: очищаю iptables rules..."
-  iptables -F
-  iptables -t nat -F
-  iptables -t mangle -F
-
-  echo "[*] Setting default policies..."
-  iptables -P INPUT ACCEPT
-  iptables -P FORWARD ACCEPT
-  iptables -P OUTPUT ACCEPT
-else
-  echo "[*] Пропускаю flush (используй --flush чтобы очистить все правила перед добавлением)"
-fi
 
 echo "[*] Enabling IP forwarding..."
 sysctl -w net.ipv4.ip_forward=1
