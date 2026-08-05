@@ -2,19 +2,29 @@
 
 Скрипт для настройки port-forward (DNAT) через iptables — прокидывает entry-порт на backend-ноду (ip:port). Позволяет держать несколько туннелей на одном entry-IP, каждый на своём порту.
 
-## Использование
+## Установка (рекомендуется)
 
-Скачать и запустить напрямую с GitHub:
+Устанавливает скрипт в систему как команду `vless-forward`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ackn0wl3dgm3nt/vless-forward/main/install.sh | sudo bash
+```
+
+После установки просто запускай:
+
+```bash
+sudo vless-forward
+```
+
+## Использование без установки
+
+Скачать и запустить напрямую:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ackn0wl3dgm3nt/vless-forward/main/setup.sh -o setup.sh && chmod +x setup.sh && sudo ./setup.sh
 ```
 
-Или в одну строку без сохранения файла:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/ackn0wl3dgm3nt/vless-forward/main/setup.sh | sudo bash
-```
+> Через `curl | bash` без сохранения файла запускать **нельзя** — скрипт спрашивает ввод (`read`), а при пайпе stdin занят самим скриптом, ввод не пройдёт.
 
 Скрипт спросит:
 
@@ -30,19 +40,27 @@ Backend (ip или ip:port, по умолчанию порт 8880): 10.0.0.5
 - `--flush` — очистить все iptables-правила перед добавлением нового туннеля:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ackn0wl3dgm3nt/vless-forward/main/setup.sh | sudo bash -s -- --flush
+sudo vless-forward --flush
 ```
 
 ## Добавление ещё одного туннеля
 
-Просто запустите скрипт снова с новым entry-портом и backend'ом — существующие правила не затрагиваются:
+Просто запусти команду снова с новым entry-портом и backend'ом — существующие правила не затрагиваются:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ackn0wl3dgm3nt/vless-forward/main/setup.sh | sudo bash
+sudo vless-forward
 ```
 
 ## Проверка активных правил
 
 ```bash
 sudo iptables -t nat -L PREROUTING -n --line-numbers
+```
+
+## Обновление
+
+Чтобы обновить установленную команду до последней версии из репозитория:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ackn0wl3dgm3nt/vless-forward/main/install.sh | sudo bash
 ```
